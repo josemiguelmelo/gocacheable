@@ -1,18 +1,20 @@
 package gocacheable
 
 import (
-	gcInterfaces "github.com/josemiguelmelo/gocacheable/interfaces"
 	"encoding/json"
 	"errors"
 	"time"
+
+	gcInterfaces "github.com/josemiguelmelo/gocacheable/interfaces"
 )
 
+// CacheableManager is responsible to manage cache storage
 type CacheableManager struct {
-	cacheStorage gcInterfaces.CacheInterface
+	cacheStorage gcInterfaces.CacheProviderInterface
 }
 
 // New Create new CacheableManager object
-func New(cacheStorage gcInterfaces.CacheInterface, cacheLife time.Duration) CacheableManager {
+func New(cacheStorage gcInterfaces.CacheProviderInterface, cacheLife time.Duration) CacheableManager {
 	cacheStorage.Init(cacheLife)
 	return CacheableManager{
 		cacheStorage: cacheStorage,
@@ -20,7 +22,7 @@ func New(cacheStorage gcInterfaces.CacheInterface, cacheLife time.Duration) Cach
 }
 
 // Get returns a cached value
-func (cs *CacheableManager) Get(key string, out interface{}) error{
+func (cs *CacheableManager) Get(key string, out interface{}) error {
 	var obj interface{}
 	err := getFromCache(cs.cacheStorage, key, &obj)
 	if err == nil {
@@ -44,14 +46,14 @@ func (cs *CacheableManager) Delete(key string) error {
 	return cs.cacheStorage.Delete(key)
 }
 
-// Reset empties the cache storage 
+// Reset empties the cache storage
 func (cs *CacheableManager) Reset() error {
 	return cs.cacheStorage.Reset()
 }
 
 // CacheableManager adds cache to the function passed as parameter
-func (cs *CacheableManager) Cacheable(key string, f func() (interface{}, error), out interface{}) error{	
-	if (cs.cacheStorage == nil) {
+func (cs *CacheableManager) Cacheable(key string, f func() (interface{}, error), out interface{}) error {
+	if cs.cacheStorage == nil {
 		return errors.New("Cache storage not created")
 	}
 
@@ -68,11 +70,11 @@ func (cs *CacheableManager) Cacheable(key string, f func() (interface{}, error),
 		jsonData, _ := json.Marshal(obj)
 		json.Unmarshal(jsonData, &out)
 	}
-	
+
 	return err
 }
 
-func getFromCache(cacheStorage gcInterfaces.CacheInterface, key string, out interface{}) error {
+func getFromCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, out interface{}) error {
 	valueByte, err := cacheStorage.Get(key)
 	if err == nil {
 		return json.Unmarshal(valueByte, &out)
@@ -80,7 +82,7 @@ func getFromCache(cacheStorage gcInterfaces.CacheInterface, key string, out inte
 	return err
 }
 
-func addToCache(cacheStorage gcInterfaces.CacheInterface, key string, value interface{}) {
+func addToCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, value interface{}) {
 	valueByte, _ := json.Marshal(value)
 	cacheStorage.Set(key, valueByte)
 }

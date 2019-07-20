@@ -1,11 +1,12 @@
 package interfaces
 
 import (
-	"testing"
-	"os"
 	"errors"
-	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var errorMsg = "Could not add"
@@ -13,7 +14,7 @@ var errorMsg = "Could not add"
 /***
 Implement CacheableInterface
 **/
-type CacheableImplementation struct {}
+type CacheableImplementation struct{}
 
 func (cacheableImplementation *CacheableImplementation) Init(cacheLife time.Duration) error {
 	return errors.New(errorMsg)
@@ -38,12 +39,12 @@ func (cacheableImplementation *CacheableImplementation) Reset() error {
 func setup() {}
 
 func TestMain(m *testing.M) {
-    setup()
+	setup()
 	code := m.Run()
 	os.Exit(code)
 }
 
-func exampleCall(interf CacheInterface) error {
+func exampleCall(interf CacheProviderInterface) error {
 	return interf.Set("", []byte(""))
 }
 
@@ -53,7 +54,7 @@ func TestCacheableInterfaceImplementation(t *testing.T) {
 	// Test pass object as generic interface param
 	err := exampleCall(implem)
 
-	// if it succeeds, err must not be null and error message must equal errorMsg 
+	// if it succeeds, err must not be null and error message must equal errorMsg
 	assert.NotNil(t, err)
 	assert.Equal(t, err.Error(), errorMsg)
 }
