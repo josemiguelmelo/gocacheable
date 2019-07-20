@@ -1,4 +1,4 @@
-package providers
+package bigcache
 
 import (
 	"time"
@@ -34,6 +34,7 @@ func (bigcacheProvider *BigCacheProvider) Set(key string, value []byte) error {
 // Get returns a cached value or error if it does not exist
 func (bigcacheProvider *BigCacheProvider) Get(key string) ([]byte, error) {
 	return bigcacheProvider.cacheStorage.Get(key)
+	// Output: Hello, nil
 }
 
 // Delete removes a value from the cache
