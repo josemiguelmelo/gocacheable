@@ -1,6 +1,7 @@
 package events
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -79,24 +80,47 @@ func TestSubscribeEvent(t *testing.T) {
 type EventProvider struct {
 }
 
-var invokeCalled = false
+var invokeCalled = 0
 
 func (ep *EventProvider) Invoke() error {
-	invokeCalled = true
+	fmt.Println("invoked")
+	invokeCalled = invokeCalled + 1
+	invokeRes <- invokeCalled
 	return nil
 }
 
+var invokeRes = make(chan int)
+
 func TestEmitEvent(t *testing.T) {
+	// Register modules
 	eventsManager.RegisterModule("event_module")
+	eventsManager.RegisterModule("event_module_2")
+	// Register events
 	eventsManager.RegisterEvent("new_event")
+	eventsManager.RegisterEvent("new_event_2")
+	eventsManager.RegisterEvent("new_event_3")
+
 	// Module Subscribe event
 	eventsManager.SubscribeEvent("event_module", "new_event")
+	eventsManager.SubscribeEvent("event_module_2", "new_event_3")
+	eventsManager.SubscribeEvent("event_module_2", "new_event")
 
-	// Invoke called variable must be false before emit event
-	assert.False(t, invokeCalled)
+	// Invoke called variable must be 0 before emit event
+	assert.Equal(t, 0, invokeCalled)
+	eventsManager.EmitEvent("new_event_2", &EventProvider{})
+	// Invoke called variable must be 0 after emit event not subscribed
+	assert.Equal(t, 0, invokeCalled)
 
+	// emit event subscribed by 1 module, must increment invokeCalled in 1
+	eventsManager.EmitEvent("new_event_3", &EventProvider{})
+	// Invoke called variable must be 1 after emit event
+	invokeCalled = <-invokeRes
+	assert.Equal(t, 1, invokeCalled)
+
+	// emit event subscribed by 1 module, must increment invokeCalled by 2
 	eventsManager.EmitEvent("new_event", &EventProvider{})
-
-	// Invoke called variable must be true after emit event
-	assert.True(t, invokeCalled)
+	// Invoke called variable must be 3 after emit event
+	invokeCalled = <-invokeRes
+	invokeCalled = <-invokeRes
+	assert.Equal(t, 3, invokeCalled)
 }

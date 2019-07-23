@@ -18,7 +18,6 @@ func (subs *CacheEventSubscriber) Subscribe(channel *chan gei.CacheEvent) {
 }
 
 func (subs *CacheEventSubscriber) listenForChannel() {
-	fmt.Println("LISTEN")
 	for {
 		event, ok := <-(*subs.channel)
 		// if channel was closed
