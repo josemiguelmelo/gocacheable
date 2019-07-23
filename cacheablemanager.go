@@ -5,14 +5,17 @@ import (
 	"errors"
 	"time"
 
+	"github.com/josemiguelmelo/gocacheable/events"
+
 	gcCacheModule "github.com/josemiguelmelo/gocacheable/cachemodule"
 	gcInterfaces "github.com/josemiguelmelo/gocacheable/interfaces"
 )
 
 // CacheableManager is responsible to manage cache storage
 type CacheableManager struct {
-	Identifier string
-	modules    []gcCacheModule.CacheModule
+	Identifier    string
+	modules       []gcCacheModule.CacheModule
+	EventsManager events.CacheEventsManager
 }
 
 // NewCacheableManager Create new CacheableManager object without modules
