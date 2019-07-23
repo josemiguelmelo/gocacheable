@@ -5,33 +5,34 @@ import (
 
 	"github.com/josemiguelmelo/gocacheable/events/channel"
 	gei "github.com/josemiguelmelo/gocacheable/events/interfaces"
+	subscriber "github.com/josemiguelmelo/gocacheable/events/subscriber"
 )
 
 // CacheEventsManager manages cache events
 type CacheEventsManager struct {
-	modules map[string]*channel.CacheEventChannel
-	events  []string
+	modules    map[string]*channel.CacheEventChannel
+	eventTypes []string
 }
 
 // NewCacheEventsManager create new channel event manager
 func NewCacheEventsManager() CacheEventsManager {
 	return CacheEventsManager{
-		modules: map[string]*channel.CacheEventChannel{},
-		events:  []string{},
+		modules:    map[string]*channel.CacheEventChannel{},
+		eventTypes: []string{},
 	}
 }
 
 // RegisterModule register a new module to listen for events
-func (cm *CacheEventsManager) RegisterModule(moduleName string) error {
+func (cm *CacheEventsManager) RegisterModule(moduleName string) (*chan gei.CacheEvent, error) {
 	if cm.ContainsModule(moduleName) {
-		return errors.New("Module already exists")
+		return nil, errors.New("Module already exists")
 	}
 	cm.modules[moduleName] = &channel.CacheEventChannel{
 		Identifier:       moduleName,
 		Channel:          make(chan gei.CacheEvent),
 		SubscribedEvents: []string{},
 	}
-	return nil
+	return &cm.modules[moduleName].Channel, nil
 }
 
 // ContainsModule returns true if module already exists
@@ -48,22 +49,25 @@ func (cm *CacheEventsManager) ModuleCount() int {
 }
 
 // SubscribeEvent subscribes a module to a event
-func (cm *CacheEventsManager) SubscribeEvent(moduleName string, event string) error {
+func (cm *CacheEventsManager) SubscribeEvent(moduleName string, eventType string) (subscriber.CacheEventSubscriber, error) {
 	if !cm.ContainsModule(moduleName) {
-		return errors.New("Module not found")
+		return subscriber.CacheEventSubscriber{}, errors.New("Module not found")
 	}
 
-	if !cm.ContainsEvent(event) {
-		return errors.New("Event not found")
+	if !cm.ContainsEventType(eventType) {
+		return subscriber.CacheEventSubscriber{}, errors.New("Event not found")
 	}
 
-	if cm.modules[moduleName].IsSubscribedTo(event) {
-		return errors.New("Module already subscribed to this event")
+	if cm.modules[moduleName].IsSubscribedTo(eventType) {
+		return subscriber.CacheEventSubscriber{}, errors.New("Module already subscribed to this event")
 	}
 
 	moduleEvents := cm.modules[moduleName].SubscribedEvents
-	cm.modules[moduleName].SubscribedEvents = append(moduleEvents, event)
-	return nil
+	cm.modules[moduleName].SubscribedEvents = append(moduleEvents, eventType)
+
+	eventSubscriber := subscriber.CacheEventSubscriber{}
+	eventSubscriber.Subscribe(&cm.modules[moduleName].Channel)
+	return eventSubscriber, nil
 }
 
 // SubscribedEvents returns list of subscribed event by module name
@@ -76,26 +80,35 @@ func (cm *CacheEventsManager) SubscribedEvents(moduleName string) ([]string, err
 }
 
 // RegisterEvent register a new event type if it does not exist
-func (cm *CacheEventsManager) RegisterEvent(event string) error {
-	if cm.ContainsEvent(event) {
+func (cm *CacheEventsManager) RegisterEvent(eventType string) error {
+	if cm.ContainsEventType(eventType) {
 		return errors.New("Event already exists")
 	}
 
-	cm.events = append(cm.events, event)
+	cm.eventTypes = append(cm.eventTypes, eventType)
 	return nil
 }
 
-// ContainsEvent returns true if event already exists
-func (cm *CacheEventsManager) ContainsEvent(event string) bool {
-	for _, e := range cm.events {
-		if e == event {
+// ContainsEventType returns true if event already exists
+func (cm *CacheEventsManager) ContainsEventType(eventType string) bool {
+	for _, e := range cm.eventTypes {
+		if e == eventType {
 			return true
 		}
 	}
 	return false
 }
 
-// EventsCount returns the number of event types available
-func (cm *CacheEventsManager) EventsCount() int {
-	return len(cm.events)
+// EventTypesCount returns the number of event types available
+func (cm *CacheEventsManager) EventTypesCount() int {
+	return len(cm.eventTypes)
+}
+
+// EmitEvent emits the event to all subscribers
+func (cm *CacheEventsManager) EmitEvent(eventType string, event gei.CacheEvent) {
+	for _, module := range cm.modules {
+		if module.IsSubscribedTo(eventType) {
+			module.Channel <- event
+		}
+	}
 }

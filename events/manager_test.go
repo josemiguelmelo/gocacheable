@@ -30,48 +30,73 @@ func TestMain(m *testing.M) {
 
 func TestManagerCreatedSuccessfully(t *testing.T) {
 	// Check manager does not contain any module
-	assert.Equal(t, 0, eventsManager.EventsCount())
+	assert.Equal(t, 0, eventsManager.EventTypesCount())
 }
 
 func TestRegisterEvent(t *testing.T) {
 	err := eventsManager.RegisterEvent("new_event")
 	assert.Nil(t, err)
-	assert.Equal(t, 1, eventsManager.EventsCount())
-	assert.Equal(t, true, eventsManager.ContainsEvent("new_event"))
+	assert.Equal(t, 1, eventsManager.EventTypesCount())
+	assert.Equal(t, true, eventsManager.ContainsEventType("new_event"))
 
 	err = eventsManager.RegisterEvent("new_event")
 	assert.NotNil(t, err)
-	assert.Equal(t, 1, eventsManager.EventsCount())
-	assert.Equal(t, true, eventsManager.ContainsEvent("new_event"))
+	assert.Equal(t, 1, eventsManager.EventTypesCount())
+	assert.Equal(t, true, eventsManager.ContainsEventType("new_event"))
 }
 
 func TestRegisterModule(t *testing.T) {
-	err := eventsManager.RegisterModule("new_module")
+	_, err := eventsManager.RegisterModule("new_module")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, eventsManager.ModuleCount())
 	assert.Equal(t, true, eventsManager.ContainsModule("new_module"))
 
-	err = eventsManager.RegisterModule("new_module")
+	_, err = eventsManager.RegisterModule("new_module")
 	assert.NotNil(t, err)
 	assert.Equal(t, 1, eventsManager.ModuleCount())
 }
 
 func TestSubscribeEvent(t *testing.T) {
 	// must be successful
-	err := eventsManager.SubscribeEvent("new_module", "new_event")
+	_, err := eventsManager.SubscribeEvent("new_module", "new_event")
 	assert.Nil(t, err)
 	events, err := eventsManager.SubscribedEvents("new_module")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(events))
 
 	// must return error
-	err = eventsManager.SubscribeEvent("new_module", "not_existing_event")
+	_, err = eventsManager.SubscribeEvent("new_module", "not_existing_event")
 	assert.NotNil(t, err)
 
 	// must return error
-	err = eventsManager.SubscribeEvent("not_existing_module", "new_event")
+	_, err = eventsManager.SubscribeEvent("not_existing_module", "new_event")
 	assert.NotNil(t, err)
 
 	_, err = eventsManager.SubscribedEvents("not_existing_module")
 	assert.NotNil(t, err)
+}
+
+type EventProvider struct {
+}
+
+var invokeCalled = false
+
+func (ep *EventProvider) Invoke() error {
+	invokeCalled = true
+	return nil
+}
+
+func TestEmitEvent(t *testing.T) {
+	eventsManager.RegisterModule("event_module")
+	eventsManager.RegisterEvent("new_event")
+	// Module Subscribe event
+	eventsManager.SubscribeEvent("event_module", "new_event")
+
+	// Invoke called variable must be false before emit event
+	assert.False(t, invokeCalled)
+
+	eventsManager.EmitEvent("new_event", &EventProvider{})
+
+	// Invoke called variable must be true after emit event
+	assert.True(t, invokeCalled)
 }
