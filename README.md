@@ -17,6 +17,7 @@ Currently, the providers available are:
 
 1) BigCache (https://github.com/allegro/bigcache)
 
+For more information about providers, [click here](docs/providers)
 
 
 ## How to use
