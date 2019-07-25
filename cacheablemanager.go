@@ -64,6 +64,37 @@ func (cs *CacheableManager) FindModule(identifier string) (*gcCacheModule.CacheM
 	return &gcCacheModule.CacheModule{}, errors.New("Module not found")
 }
 
+
+// DeleteKey removes a key from a module
+func (cs *CacheableManager) Get(moduleID string, key string, out interface{}) error {
+	module, err := cs.FindModule(moduleID)
+	if err != nil {
+		return err
+	}
+
+	return module.Get(key, &out)
+}
+
+// DeleteKey removes a key from a module
+func (cs *CacheableManager) DeleteKey(moduleID string, key string) error {
+	module, err := cs.FindModule(moduleID)
+	if err != nil {
+		return err
+	}
+
+	return module.Delete(key)
+}
+
+// Reset resets a module cache
+func (cs *CacheableManager) Reset(moduleID string) error {
+	module, err := cs.FindModule(moduleID)
+	if err != nil {
+		return err
+	}
+
+	return module.Reset()
+}
+
 // Cacheable adds cache to the function passed as parameter
 func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (interface{}, error), out interface{}) error {
 	module, err := cs.FindModule(moduleID)

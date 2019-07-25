@@ -132,3 +132,27 @@ func TestCacheableMethodWithObject(t *testing.T) {
 	// Is not serializable as it is private, so is not cached.
 	assert.Equal(t, "", outValue.notShown)
 }
+
+func TestCacheableDeleteKey(t *testing.T) {
+	var outVal ExampleObj
+	err := cacheableManager.Get(moduleName, "test_object", &outVal)
+	assert.Nil(t, err)
+
+	err = cacheableManager.DeleteKey(moduleName, "test_object")
+	assert.Nil(t, err)
+
+	err = cacheableManager.Get(moduleName, "test_object", &outVal)
+	assert.NotNil(t, err)
+}
+
+func TestCacheableReset(t *testing.T) {
+	var outVal ExampleObj
+	err := cacheableManager.Get(moduleName, "test", &outVal)
+	assert.Nil(t, err)
+
+	err = cacheableManager.Reset(moduleName)
+	assert.Nil(t, err)
+
+	err = cacheableManager.Get(moduleName, "test", &outVal)
+	assert.NotNil(t, err)
+}
