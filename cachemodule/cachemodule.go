@@ -49,8 +49,8 @@ func (cm CacheModule) Get(key string, out interface{}) error {
 }
 
 // Set caches a value
-func (cm *CacheModule) Set(key string, value interface{}) {
-	addToCache(cm.cacheStorage, key, value)
+func (cm *CacheModule) Set(key string, value interface{}) error {
+	return addToCache(cm.cacheStorage, key, value)
 }
 
 // Delete removes a key from the cache storage
@@ -71,7 +71,11 @@ func getFromCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, 
 	return err
 }
 
-func addToCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, value interface{}) {
+func addToCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, value interface{}) error {
 	valueByte, _ := json.Marshal(value)
-	cacheStorage.Set(key, valueByte)
+	err := cacheStorage.Set(key, valueByte)
+	if  err != nil {
+		return err
+	}
+	return nil
 }

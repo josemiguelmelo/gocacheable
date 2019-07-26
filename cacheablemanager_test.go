@@ -81,8 +81,8 @@ func methodToCache() int {
 
 func secondMethodToCache() int {
 	panic(errors.New("Should not be here"))
-	return 10
 }
+
 func TestCacheableMethod(t *testing.T) {
 	var outValue int
 	err := cacheableManager.Cacheable(moduleName, "test", func() (interface{}, error) {

@@ -8,11 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	identifier = "testing_manager"
-	moduleName = "testing_module"
-)
-
 var invokeCalled = 0
 var invokeRes = make(chan int)
 
@@ -103,35 +98,45 @@ func TestSubscribeEvent(t *testing.T) {
 
 func TestEmitEvent(t *testing.T) {
 	// Register modules
-	eventsManager.RegisterModule("event_module")
-	eventsManager.RegisterModule("event_module_2")
+	_, err := eventsManager.RegisterModule("event_module")
+	assert.Nil(t, err)
+	_, err = eventsManager.RegisterModule("event_module_2")
+	assert.Nil(t, err)
 	// Register events
-	eventsManager.RegisterEvent("new_event")
-	eventsManager.RegisterEvent("new_event_2")
-	eventsManager.RegisterEvent("new_event_3")
+	err = eventsManager.RegisterEvent("new_event")
+	assert.Nil(t, err)
+	err = eventsManager.RegisterEvent("new_event_2")
+	assert.Nil(t, err)
+	err = eventsManager.RegisterEvent("new_event_3")
+	assert.Nil(t, err)
 
 	// Module Subscribe event
-	eventsManager.SubscribeEvent(
+	_, err = eventsManager.SubscribeEvent(
 		"event_module", 
 		"new_event", 
 		func(a interfaces.CacheEvent) {
 			invokeRes <- 1
 		},
 	)
-	eventsManager.SubscribeEvent(
+	assert.Nil(t, err)
+
+	_, err = eventsManager.SubscribeEvent(
 		"event_module_2",
 		"new_event_3", 
 		func(a  interfaces.CacheEvent) {
 			invokeRes <- 1
 		},
 	)
-	eventsManager.SubscribeEvent(
+	assert.Nil(t, err)
+
+	_, err = eventsManager.SubscribeEvent(
 		"event_module_2", 
 		"new_event", 
 		func(a  interfaces.CacheEvent) {
 			invokeRes <- 1
 		},
 	)
+	assert.Nil(t, err)
 
 	// Invoke called variable must be 0 before emit event
 	assert.Equal(t, 0, invokeCalled)

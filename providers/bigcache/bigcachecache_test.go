@@ -49,7 +49,8 @@ func TestBigCacheInit(t *testing.T) {
 	// Cache storage still not initialized
 	assert.Nil(t, cacheProvider.cacheStorage)
 
-	cacheProvider.Init(2)
+	err := cacheProvider.Init(2)
+	assert.Nil(t, err)
 
 	// Cache storage already initialized
 	assert.NotNil(t, cacheProvider.cacheStorage)
