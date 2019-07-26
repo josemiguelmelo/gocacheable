@@ -49,7 +49,7 @@ func (cm *CacheEventsManager) ModuleCount() int {
 }
 
 // SubscribeEvent subscribes a module to a event
-func (cm *CacheEventsManager) SubscribeEvent(moduleName string, eventType string) (subscriber.CacheEventSubscriber, error) {
+func (cm *CacheEventsManager) SubscribeEvent(moduleName string, eventType string, callback func(gei.CacheEvent)) (subscriber.CacheEventSubscriber, error) {
 	if !cm.ContainsModule(moduleName) {
 		return subscriber.CacheEventSubscriber{}, errors.New("Module not found")
 	}
@@ -66,7 +66,7 @@ func (cm *CacheEventsManager) SubscribeEvent(moduleName string, eventType string
 	cm.modules[moduleName].SubscribedEvents = append(moduleEvents, eventType)
 
 	eventSubscriber := subscriber.CacheEventSubscriber{}
-	eventSubscriber.Subscribe(&cm.modules[moduleName].Channel)
+	eventSubscriber.Subscribe(&cm.modules[moduleName].Channel, callback)
 	return eventSubscriber, nil
 }
 
