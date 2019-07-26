@@ -1,4 +1,4 @@
-# Events (Under development)
+# Events
 
 GoCacheable has a feature that allows modules to subscribe events. This is useful to delete or update cache when something happens.
 
@@ -13,10 +13,13 @@ The event manager contains a list of modules which are registered to listen/send
 
 ## Event Subscriber
 
-**CacheEventSubscriber** is the event subscriber class. It is responsible to listen/read from the channel events are sent to. 
+**CacheEventSubscriber** is the event subscriber class. It is responsible to listen/read from the channel events are sent to.
 
+## Cache event
 
-## Add new event
+Cache event is the type sent to publish/subscribe channel.
+
+## Add new cache event type
 
 Adding a new event is quite simple, only being necessary to implement the **CacheEvent** interface.
 
@@ -44,11 +47,18 @@ eventsManager.RegisterModule("new_module")
 3. Subscribe module to event
 
 ```
-err := eventsManager.SubscribeEvent("new_module", "new_event")
+err := eventsManager.SubscribeEvent(
+	"event_module", 
+	"new_event", 
+	func(a  interfaces.CacheEvent) {
+		invokeCalled = invokeCalled + 1
+		invokeRes <- invokeCalled
+	},
+)
 ```
 
 4. Emit event to all subscribers
 
 ```
-eventsManager.EmitEvent("new_event", &EventProvider{})
+eventsManager.EmitEvent("new_event", &UpdateObjectCacheEvent{})
 ```
