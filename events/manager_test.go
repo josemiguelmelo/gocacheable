@@ -115,24 +115,21 @@ func TestEmitEvent(t *testing.T) {
 		"event_module", 
 		"new_event", 
 		func(a interfaces.CacheEvent) {
-			invokeCalled = invokeCalled + 1
-			invokeRes <- invokeCalled
+			invokeRes <- 1
 		},
 	)
 	eventsManager.SubscribeEvent(
 		"event_module_2",
 		"new_event_3", 
 		func(a  interfaces.CacheEvent) {
-			invokeCalled = invokeCalled + 1
-			invokeRes <- invokeCalled
+			invokeRes <- 1
 		},
 	)
 	eventsManager.SubscribeEvent(
 		"event_module_2", 
 		"new_event", 
 		func(a  interfaces.CacheEvent) {
-			invokeCalled = invokeCalled + 1
-			invokeRes <- invokeCalled
+			invokeRes <- 1
 		},
 	)
 
@@ -145,13 +142,13 @@ func TestEmitEvent(t *testing.T) {
 	// emit event subscribed by 1 module, must increment invokeCalled in 1
 	eventsManager.EmitEvent("new_event_3", &EventProvider{})
 	// Invoke called variable must be 1 after emit event
-	invokeCalled = <-invokeRes
+	invokeCalled = invokeCalled + <-invokeRes
 	assert.Equal(t, 1, invokeCalled)
 
 	// emit event subscribed by 1 module, must increment invokeCalled by 2
 	eventsManager.EmitEvent("new_event", &EventProvider{})
 	// Invoke called variable must be 3 after emit event
-	invokeCalled = <-invokeRes
-	invokeCalled = <-invokeRes
+	invokeCalled = invokeCalled + <-invokeRes
+	invokeCalled = invokeCalled + <-invokeRes
 	assert.Equal(t, 3, invokeCalled)
 }
