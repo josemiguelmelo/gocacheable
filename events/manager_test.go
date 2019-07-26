@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
+	interfaces "github.com/josemiguelmelo/gocacheable/events/interfaces"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,6 +12,17 @@ const (
 	identifier = "testing_manager"
 	moduleName = "testing_module"
 )
+
+var invokeCalled = 0
+var invokeRes = make(chan int)
+
+type EventProvider struct {
+}
+
+func (ep *EventProvider) Invoke() error {
+	fmt.Println("invoked")
+	return nil
+}
 
 var eventsManager CacheEventsManager
 
@@ -59,37 +70,36 @@ func TestRegisterModule(t *testing.T) {
 
 func TestSubscribeEvent(t *testing.T) {
 	// must be successful
-	_, err := eventsManager.SubscribeEvent("new_module", "new_event")
+	_, err := eventsManager.SubscribeEvent(
+		"new_module", 
+		"new_event", 
+		func(a interfaces.CacheEvent) {},
+	)
 	assert.Nil(t, err)
 	events, err := eventsManager.SubscribedEvents("new_module")
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(events))
 
 	// must return error
-	_, err = eventsManager.SubscribeEvent("new_module", "not_existing_event")
+	_, err = eventsManager.SubscribeEvent(
+		"new_module", 
+		"not_existing_event", 
+		func(a  interfaces.CacheEvent) {},
+	)
 	assert.NotNil(t, err)
 
 	// must return error
-	_, err = eventsManager.SubscribeEvent("not_existing_module", "new_event")
+	_, err = eventsManager.SubscribeEvent(
+		"not_existing_module", 
+		"new_event",
+		 func(a  interfaces.CacheEvent) {},
+	)
 	assert.NotNil(t, err)
 
 	_, err = eventsManager.SubscribedEvents("not_existing_module")
 	assert.NotNil(t, err)
 }
 
-type EventProvider struct {
-}
-
-var invokeCalled = 0
-
-func (ep *EventProvider) Invoke() error {
-	fmt.Println("invoked")
-	invokeCalled = invokeCalled + 1
-	invokeRes <- invokeCalled
-	return nil
-}
-
-var invokeRes = make(chan int)
 
 func TestEmitEvent(t *testing.T) {
 	// Register modules
@@ -101,9 +111,30 @@ func TestEmitEvent(t *testing.T) {
 	eventsManager.RegisterEvent("new_event_3")
 
 	// Module Subscribe event
-	eventsManager.SubscribeEvent("event_module", "new_event")
-	eventsManager.SubscribeEvent("event_module_2", "new_event_3")
-	eventsManager.SubscribeEvent("event_module_2", "new_event")
+	eventsManager.SubscribeEvent(
+		"event_module", 
+		"new_event", 
+		func(a interfaces.CacheEvent) {
+			invokeCalled = invokeCalled + 1
+			invokeRes <- invokeCalled
+		},
+	)
+	eventsManager.SubscribeEvent(
+		"event_module_2",
+		"new_event_3", 
+		func(a  interfaces.CacheEvent) {
+			invokeCalled = invokeCalled + 1
+			invokeRes <- invokeCalled
+		},
+	)
+	eventsManager.SubscribeEvent(
+		"event_module_2", 
+		"new_event", 
+		func(a  interfaces.CacheEvent) {
+			invokeCalled = invokeCalled + 1
+			invokeRes <- invokeCalled
+		},
+	)
 
 	// Invoke called variable must be 0 before emit event
 	assert.Equal(t, 0, invokeCalled)
