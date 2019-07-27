@@ -81,8 +81,8 @@ func methodToCache() int {
 
 func secondMethodToCache() int {
 	panic(errors.New("Should not be here"))
-	return 10
 }
+
 func TestCacheableMethod(t *testing.T) {
 	var outValue int
 	err := cacheableManager.Cacheable(moduleName, "test", func() (interface{}, error) {
@@ -146,7 +146,7 @@ func TestCacheableDeleteKey(t *testing.T) {
 }
 
 func TestCacheableReset(t *testing.T) {
-	var outVal ExampleObj
+	var outVal int
 	err := cacheableManager.Get(moduleName, "test", &outVal)
 	assert.Nil(t, err)
 
@@ -155,4 +155,5 @@ func TestCacheableReset(t *testing.T) {
 
 	err = cacheableManager.Get(moduleName, "test", &outVal)
 	assert.NotNil(t, err)
+	assert.Equal(t, "Entry not found", err.Error())
 }

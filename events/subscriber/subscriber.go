@@ -23,7 +23,7 @@ func (subs *CacheEventSubscriber) listenForChannel() {
 	for {
 		event, ok := <-(*subs.channel)
 		// if channel was closed
-		if ok == false {
+		if !ok {
 			fmt.Print(subs.channel)
 			fmt.Println(" channel was closed")
 			return

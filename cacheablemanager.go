@@ -43,7 +43,11 @@ func (cs *CacheableManager) ContainsModule(module gcCacheModule.CacheModule) boo
 
 // AddModule adds a new module if it still does not exists
 func (cs *CacheableManager) AddModule(name string, storageProvider gcInterfaces.CacheProviderInterface, cacheLife time.Duration) error {
-	storageProvider.Init(cacheLife)
+	err := storageProvider.Init(cacheLife)
+	if err != nil {
+		return err
+	}
+
 	module := gcCacheModule.New(name, storageProvider)
 
 	if cs.ContainsModule(module) {
@@ -63,7 +67,6 @@ func (cs *CacheableManager) FindModule(identifier string) (*gcCacheModule.CacheM
 	}
 	return &gcCacheModule.CacheModule{}, errors.New("Module not found")
 }
-
 
 // DeleteKey removes a key from a module
 func (cs *CacheableManager) Get(moduleID string, key string, out interface{}) error {
@@ -115,9 +118,15 @@ func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (int
 
 	obj, err = f()
 	if err == nil {
-		module.Set(key, obj)
+		err = module.Set(key, obj)
+		if err != nil {
+			return err
+		}
 		jsonData, _ := json.Marshal(obj)
-		json.Unmarshal(jsonData, &out)
+		err = json.Unmarshal(jsonData, &out)
+		if err != nil {
+			return err
+		}
 	}
 
 	return err

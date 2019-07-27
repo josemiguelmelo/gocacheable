@@ -1,4 +1,5 @@
 # GoCacheable
+[![Build Status](https://travis-ci.org/josemiguelmelo/gocacheable.svg?branch=master)](https://travis-ci.org/josemiguelmelo/gocacheable)
 
 Golang function calls result cache made easy.
 
