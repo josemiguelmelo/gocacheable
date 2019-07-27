@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
 	interfaces "github.com/josemiguelmelo/gocacheable/events/interfaces"
 	"github.com/stretchr/testify/assert"
 )
@@ -66,8 +67,8 @@ func TestRegisterModule(t *testing.T) {
 func TestSubscribeEvent(t *testing.T) {
 	// must be successful
 	_, err := eventsManager.SubscribeEvent(
-		"new_module", 
-		"new_event", 
+		"new_module",
+		"new_event",
 		func(a interfaces.CacheEvent) {},
 	)
 	assert.Nil(t, err)
@@ -77,24 +78,23 @@ func TestSubscribeEvent(t *testing.T) {
 
 	// must return error
 	_, err = eventsManager.SubscribeEvent(
-		"new_module", 
-		"not_existing_event", 
-		func(a  interfaces.CacheEvent) {},
+		"new_module",
+		"not_existing_event",
+		func(a interfaces.CacheEvent) {},
 	)
 	assert.NotNil(t, err)
 
 	// must return error
 	_, err = eventsManager.SubscribeEvent(
-		"not_existing_module", 
+		"not_existing_module",
 		"new_event",
-		 func(a  interfaces.CacheEvent) {},
+		func(a interfaces.CacheEvent) {},
 	)
 	assert.NotNil(t, err)
 
 	_, err = eventsManager.SubscribedEvents("not_existing_module")
 	assert.NotNil(t, err)
 }
-
 
 func TestEmitEvent(t *testing.T) {
 	// Register modules
@@ -104,7 +104,7 @@ func TestEmitEvent(t *testing.T) {
 	assert.Nil(t, err)
 	// Register events
 	err = eventsManager.RegisterEvent("new_event")
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	err = eventsManager.RegisterEvent("new_event_2")
 	assert.Nil(t, err)
 	err = eventsManager.RegisterEvent("new_event_3")
@@ -112,8 +112,8 @@ func TestEmitEvent(t *testing.T) {
 
 	// Module Subscribe event
 	_, err = eventsManager.SubscribeEvent(
-		"event_module", 
-		"new_event", 
+		"event_module",
+		"new_event",
 		func(a interfaces.CacheEvent) {
 			invokeRes <- 1
 		},
@@ -122,17 +122,17 @@ func TestEmitEvent(t *testing.T) {
 
 	_, err = eventsManager.SubscribeEvent(
 		"event_module_2",
-		"new_event_3", 
-		func(a  interfaces.CacheEvent) {
+		"new_event_3",
+		func(a interfaces.CacheEvent) {
 			invokeRes <- 1
 		},
 	)
 	assert.Nil(t, err)
 
 	_, err = eventsManager.SubscribeEvent(
-		"event_module_2", 
-		"new_event", 
-		func(a  interfaces.CacheEvent) {
+		"event_module_2",
+		"new_event",
+		func(a interfaces.CacheEvent) {
 			invokeRes <- 1
 		},
 	)
