@@ -38,9 +38,9 @@ func (cm CacheModule) Get(key string, out interface{}) error {
 	var obj interface{}
 	err := getFromCache(cm.cacheStorage, key, &obj)
 	if err == nil {
-		if jsonData, err := json.Marshal(obj); err == nil {
-			json.Unmarshal(jsonData, &out)
-			return err
+		jsonData, err := json.Marshal(obj)
+		if err == nil {
+			return json.Unmarshal(jsonData, &out)
 		}
 		out = obj
 		return err
@@ -74,7 +74,7 @@ func getFromCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, 
 func addToCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, value interface{}) error {
 	valueByte, _ := json.Marshal(value)
 	err := cacheStorage.Set(key, valueByte)
-	if  err != nil {
+	if err != nil {
 		return err
 	}
 	return nil

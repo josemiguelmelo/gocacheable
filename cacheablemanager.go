@@ -68,7 +68,6 @@ func (cs *CacheableManager) FindModule(identifier string) (*gcCacheModule.CacheM
 	return &gcCacheModule.CacheModule{}, errors.New("Module not found")
 }
 
-
 // DeleteKey removes a key from a module
 func (cs *CacheableManager) Get(moduleID string, key string, out interface{}) error {
 	module, err := cs.FindModule(moduleID)
@@ -119,9 +118,12 @@ func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (int
 
 	obj, err = f()
 	if err == nil {
-		module.Set(key, obj)
+		err = module.Set(key, obj)
+		if err != nil {
+			return err
+		}
 		jsonData, _ := json.Marshal(obj)
-		err := json.Unmarshal(jsonData, &out)
+		err = json.Unmarshal(jsonData, &out)
 		if err != nil {
 			return err
 		}
