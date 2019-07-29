@@ -38,17 +38,21 @@ func TestManagerCreatedSuccessfully(t *testing.T) {
 }
 
 func TestAddModuleToManager(t *testing.T) {
-	storageProvider := &bcProvider.BigCacheProvider{}
+	storageProvider := &bcProvider.BigCacheProvider{
+		Lifetime: 2,
+	}
 
-	err := cacheableManager.AddModule(moduleName, storageProvider, 2)
+	err := cacheableManager.AddModule(moduleName, storageProvider)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, cacheableManager.ModulesCount())
 }
 
 func TestAddAlreadyExistingModuleToManager(t *testing.T) {
-	storageProvider := &bcProvider.BigCacheProvider{}
-	err := cacheableManager.AddModule(moduleName, storageProvider, 2)
+	storageProvider := &bcProvider.BigCacheProvider{
+		Lifetime: 2,
+	}
+	err := cacheableManager.AddModule(moduleName, storageProvider)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "Module already exists", err.Error())

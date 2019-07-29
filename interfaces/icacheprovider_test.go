@@ -4,8 +4,7 @@ import (
 	"errors"
 	"os"
 	"testing"
-	"time"
-
+	
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +15,7 @@ Implement CacheableInterface
 **/
 type CacheableImplementation struct{}
 
-func (cacheableImplementation *CacheableImplementation) Init(cacheLife time.Duration) error {
+func (cacheableImplementation *CacheableImplementation) Init() error {
 	return errors.New(errorMsg)
 }
 

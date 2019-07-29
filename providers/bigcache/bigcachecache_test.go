@@ -45,11 +45,13 @@ func TestMain(m *testing.M) {
 }
 
 func TestBigCacheInit(t *testing.T) {
-	cacheProvider := BigCacheProvider{}
+	cacheProvider := BigCacheProvider{
+		Lifetime: 2,
+	}
 	// Cache storage still not initialized
 	assert.Nil(t, cacheProvider.cacheStorage)
 
-	err := cacheProvider.Init(2)
+	err := cacheProvider.Init()
 	assert.Nil(t, err)
 
 	// Cache storage already initialized
@@ -59,7 +61,7 @@ func TestBigCacheInit(t *testing.T) {
 }
 
 func TestBigCacheStorageAddAndGetMethods(t *testing.T) {
-	// Add inital value to cache
+	// Add initial value to cache
 	err := bigcacheStorage.Set(cacheKey, []byte(initialExpectedValue))
 	assert.Nil(t, err)
 
@@ -97,7 +99,7 @@ func TestBigCacheStorageDeleteValue(t *testing.T) {
 }
 
 func TestBigCacheStorageReset(t *testing.T) {
-	// Add inital value to cache
+	// Add initial value to cache
 	err := bigcacheStorage.Set(cacheKey, []byte(initialExpectedValue))
 	assert.Nil(t, err)
 
