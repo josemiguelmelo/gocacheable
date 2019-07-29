@@ -3,7 +3,6 @@ package gocacheable
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/josemiguelmelo/gocacheable/events"
 
@@ -42,8 +41,8 @@ func (cs *CacheableManager) ContainsModule(module gcCacheModule.CacheModule) boo
 }
 
 // AddModule adds a new module if it still does not exists
-func (cs *CacheableManager) AddModule(name string, storageProvider gcInterfaces.CacheProviderInterface, cacheLife time.Duration) error {
-	err := storageProvider.Init(cacheLife)
+func (cs *CacheableManager) AddModule(name string, storageProvider gcInterfaces.CacheProviderInterface) error {
+	err := storageProvider.Init()
 	if err != nil {
 		return err
 	}
@@ -68,7 +67,7 @@ func (cs *CacheableManager) FindModule(identifier string) (*gcCacheModule.CacheM
 	return &gcCacheModule.CacheModule{}, errors.New("Module not found")
 }
 
-// DeleteKey removes a key from a module
+// Get get key value from cache
 func (cs *CacheableManager) Get(moduleID string, key string, out interface{}) error {
 	module, err := cs.FindModule(moduleID)
 	if err != nil {

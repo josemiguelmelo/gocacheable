@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"fmt"
+	"log"
 
 	gei "github.com/josemiguelmelo/gocacheable/events/interfaces"
 )
@@ -24,8 +24,8 @@ func (subs *CacheEventSubscriber) listenForChannel() {
 		event, ok := <-(*subs.channel)
 		// if channel was closed
 		if !ok {
-			fmt.Print(subs.channel)
-			fmt.Println(" channel was closed")
+			log.Print(subs.channel)
+			log.Println(" channel was closed")
 			return
 		}
 

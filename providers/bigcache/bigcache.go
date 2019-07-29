@@ -9,14 +9,15 @@ import (
 // BigCacheProvider is a storage provider based on bigcache caching system
 type BigCacheProvider struct {
 	cacheStorage *bigcache.BigCache
+	Lifetime time.Duration
 }
 
 // Init initializes bigcache storage
-func (bigcacheProvider *BigCacheProvider) Init(life time.Duration) error {
+func (bigcacheProvider *BigCacheProvider) Init() error {
 	configuration := bigcache.Config{
 		Shards:             1024,
-		LifeWindow:         life * time.Minute,
-		CleanWindow:        life * time.Minute,
+		LifeWindow:         bigcacheProvider.Lifetime * time.Minute,
+		CleanWindow:        bigcacheProvider.Lifetime * time.Minute,
 		MaxEntriesInWindow: 1000 * 10 * 60,
 		Verbose:            true,
 		HardMaxCacheSize:   8192,
