@@ -5,3 +5,7 @@ go-get:
 test:
 	@echo "  >  Testing gocacheable..."
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=on go test -v -race -coverprofile=gocacheable.coverprofile ./...
+
+gofmt:
+	@echo " > Lint gocacheable..."
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) GO111MODULE=on gofmt -w .

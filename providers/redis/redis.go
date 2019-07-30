@@ -3,10 +3,15 @@ package redis
 import "github.com/gomodule/redigo/redis"
 
 const (
+	// ACTION_SET redis set key value action
 	ACTION_SET = "SET"
+	// ACTION_GET redis get key value action
 	ACTION_GET = "GET"
+	// ACTION_DELETE redis delete key value action
 	ACTION_DELETE = "DEL"
+	// ACTION_RESET redis reset cache action
 	ACTION_RESET = "FLUSHDB"
+	// ACTION_PING redis ping action
 	ACTION_PING = "PING"
 )
 
@@ -27,8 +32,8 @@ func newRedisPool(addr string, maxIdle int, maxActive int) *redis.Pool {
 // NewRedisProvider returns a RedisProvider
 func NewRedisProvider(addr string, maxIdle int, maxActive int) (*RedisProvider, error) {
 	redisProvider := &RedisProvider{
-		Addr: addr,
-		MaxIdle: maxIdle,
+		Addr:      addr,
+		MaxIdle:   maxIdle,
 		MaxActive: maxActive,
 	}
 
@@ -41,15 +46,15 @@ func NewRedisProvider(addr string, maxIdle int, maxActive int) (*RedisProvider, 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return redisProvider, nil
 }
 
 // RedisProvider is a storage provider based on redis caching system
 type RedisProvider struct {
 	redisPool *redis.Pool
-	Addr string
-	MaxIdle int
+	Addr      string
+	MaxIdle   int
 	MaxActive int
 }
 
@@ -65,7 +70,7 @@ func (redisProvider *RedisProvider) Set(key string, value []byte) error {
 	defer conn.Close()
 
 	_, err := conn.Do(ACTION_SET, key, string(value))
-    return err
+	return err
 }
 
 // Get returns a cached value or error if it does not exist
@@ -74,9 +79,9 @@ func (redisProvider *RedisProvider) Get(key string) ([]byte, error) {
 	defer conn.Close()
 
 	s, err := redis.String(conn.Do(ACTION_GET, key))
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 	return []byte(s), nil
 
 }

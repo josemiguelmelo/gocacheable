@@ -3,18 +3,17 @@ package redis
 import (
 	"os"
 	"testing"
-	
 
-	"github.com/stretchr/testify/assert"
 	"github.com/alicebob/miniredis"
+	"github.com/stretchr/testify/assert"
 )
 
 var redisProvider *RedisProvider
 var redisServer *miniredis.Miniredis
 
 const (
-	existingKey = "key"
-	notExistingKey = "not_key"
+	existingKey      = "key"
+	notExistingKey   = "not_key"
 	existingKeyValue = "key_value"
 )
 
@@ -32,7 +31,7 @@ func setup() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	redisProvider = NewCacheableStorage()
 }
 
@@ -44,7 +43,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestInitRedis(t *testing.T) {
-	redProv , err := NewRedisProvider(redisServer.Addr(), 10, 100)
+	redProv, err := NewRedisProvider(redisServer.Addr(), 10, 100)
 	assert.Nil(t, err)
 	assert.NotNil(t, redProv)
 
@@ -56,7 +55,7 @@ func TestInitRedis(t *testing.T) {
 }
 
 func TestPingRedis(t *testing.T) {
-	redProv , err := NewRedisProvider(":80", 10, 100)
+	redProv, err := NewRedisProvider(":80", 10, 100)
 	assert.NotNil(t, err)
 	assert.Nil(t, redProv)
 }
@@ -68,7 +67,6 @@ func TestSetAndGetCache(t *testing.T) {
 	val, err := redisProvider.Get(existingKey)
 	assert.Nil(t, err)
 	assert.Equal(t, "first_value", string(val))
-
 
 	// Update value
 	err = redisProvider.Set(existingKey, []byte(existingKeyValue))
@@ -102,7 +100,6 @@ func TestDeleteKeyCache(t *testing.T) {
 	_, err = redisProvider.Get(existingKey)
 	assert.NotNil(t, err)
 }
-
 
 func TestResetKeyCache(t *testing.T) {
 	// Add keys
