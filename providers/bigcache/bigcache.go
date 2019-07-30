@@ -9,7 +9,7 @@ import (
 // BigCacheProvider is a storage provider based on bigcache caching system
 type BigCacheProvider struct {
 	cacheStorage *bigcache.BigCache
-	Lifetime time.Duration
+	Lifetime     time.Duration
 }
 
 // Init initializes bigcache storage
