@@ -46,7 +46,6 @@ func NewRedisProvider(addr string, maxIdle int, maxActive int) (*RedisProvider, 
 	if err != nil {
 		return nil, err
 	}
-
 	return redisProvider, nil
 }
 

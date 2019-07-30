@@ -31,7 +31,6 @@ func setup() {
 	if err != nil {
 		panic(err)
 	}
-
 	redisProvider = NewCacheableStorage()
 }
 
