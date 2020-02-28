@@ -3,8 +3,11 @@ package gocacheable
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/josemiguelmelo/gocacheable/events"
+	"github.com/sirupsen/logrus"
 
 	gcCacheModule "github.com/josemiguelmelo/gocacheable/cachemodule"
 	gcInterfaces "github.com/josemiguelmelo/gocacheable/interfaces"
@@ -98,7 +101,7 @@ func (cs *CacheableManager) Reset(moduleID string) error {
 }
 
 // Cacheable adds cache to the function passed as parameter
-func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (interface{}, error), out interface{}) error {
+func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (interface{}, error), out interface{}, timeToLive time.Duration) error {
 	module, err := cs.FindModule(moduleID)
 	if err != nil {
 		return err
@@ -114,6 +117,14 @@ func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (int
 	if err == nil {
 		return err
 	}
+
+	time.AfterFunc(timeToLive, func() {
+		if module.HasKey(key) {
+			if deleteErr := module.Delete(key); deleteErr != nil {
+				logrus.Errorln(fmt.Sprintf("Error deleting cache with key = %s from module %s with err = %s", key, module.Name, deleteErr.Error()))
+			}
+		}
+	})
 
 	obj, err = f()
 	if err == nil {

@@ -63,6 +63,10 @@ func (cm *CacheModule) Reset() error {
 	return cm.cacheStorage.Reset()
 }
 
+func (cm *CacheModule) HasKey(key string) bool {
+	return cm.cacheStorage.HasKey(key)
+}
+
 func getFromCache(cacheStorage gcInterfaces.CacheProviderInterface, key string, out interface{}) error {
 	valueByte, err := cacheStorage.Get(key)
 	if err == nil {

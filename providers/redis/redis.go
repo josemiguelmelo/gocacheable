@@ -111,3 +111,9 @@ func (redisProvider *RedisProvider) Ping() error {
 	_, err := redis.String(conn.Do(ACTION_PING))
 	return err
 }
+
+// HasKey checks if the key exists
+func (redisProvider *RedisProvider) HasKey(key string) bool {
+	_, err := redisProvider.Get(key)
+	return err == nil
+}

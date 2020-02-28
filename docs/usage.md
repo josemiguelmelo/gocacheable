@@ -21,8 +21,7 @@ To add a new module, you only need to add the following line to the code:
 
 ```
 storageProvider := &bcProvider.BigCacheProvider{}
-timeToLive := 2
-err := cacheableManager.AddModule(moduleName, storageProvider, timeToLive)
+err := cacheableManager.AddModule(moduleName, storageProvider)
 ```
 
 ## 3. Cache function result
@@ -34,13 +33,15 @@ Suppose you want to cache the function: *func example() string*
 ```
 var outValue string
 cacheKey := "test_object"
+timeToLive := 2 * time.Second
 err := cacheableManager.Cacheable(
     moduleName, 
     cacheKey, 
     func() (interface{}, error) {
         return example(), nil
     },
-    &outValue
+    &outValue,
+    timeToLive
 )
 ```
 
