@@ -2,9 +2,10 @@ package interfaces
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var errorMsg = "Could not add"
@@ -32,6 +33,10 @@ func (cacheableImplementation *CacheableImplementation) Delete(key string) error
 
 func (cacheableImplementation *CacheableImplementation) Reset() error {
 	return nil
+}
+
+func (cacheableImplementation *CacheableImplementation) HasKey(key string) bool {
+	return true
 }
 
 func setup() {}

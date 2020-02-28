@@ -3,9 +3,11 @@ package gocacheable
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/josemiguelmelo/gocacheable/events"
+	"github.com/sirupsen/logrus"
 
 	gcCacheModule "github.com/josemiguelmelo/gocacheable/cachemodule"
 	gcInterfaces "github.com/josemiguelmelo/gocacheable/interfaces"
@@ -116,7 +118,13 @@ func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (int
 		return err
 	}
 
-	time.AfterFunc(timeToLive, func() { module.Delete(key) })
+	time.AfterFunc(timeToLive, func() {
+		if module.HasKey(key) {
+			if deleteErr := module.Delete(key); deleteErr != nil {
+				logrus.Errorln(fmt.Sprintf("Error deleting cache with key = %s from module %s with err = %s", key, module.Name, deleteErr.Error()))
+			}
+		}
+	})
 
 	obj, err = f()
 	if err == nil {

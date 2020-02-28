@@ -47,3 +47,9 @@ func (bigcacheProvider *BigCacheProvider) Delete(key string) error {
 func (bigcacheProvider *BigCacheProvider) Reset() error {
 	return bigcacheProvider.cacheStorage.Reset()
 }
+
+// HasKey checks if the key exists
+func (bigcacheProvider *BigCacheProvider) HasKey(key string) bool {
+	_, err := bigcacheProvider.cacheStorage.Get(key)
+	return err == nil
+}
