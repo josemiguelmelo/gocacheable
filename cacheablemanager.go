@@ -3,6 +3,7 @@ package gocacheable
 import (
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/josemiguelmelo/gocacheable/events"
 
@@ -98,7 +99,7 @@ func (cs *CacheableManager) Reset(moduleID string) error {
 }
 
 // Cacheable adds cache to the function passed as parameter
-func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (interface{}, error), out interface{}) error {
+func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (interface{}, error), out interface{}, timeToLive time.Duration) error {
 	module, err := cs.FindModule(moduleID)
 	if err != nil {
 		return err
@@ -114,6 +115,8 @@ func (cs *CacheableManager) Cacheable(moduleID string, key string, f func() (int
 	if err == nil {
 		return err
 	}
+
+	time.AfterFunc(timeToLive, func() { module.Delete(key) })
 
 	obj, err = f()
 	if err == nil {

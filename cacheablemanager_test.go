@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"time"
 
 	gcCacheModule "github.com/josemiguelmelo/gocacheable/cachemodule"
 	bcProvider "github.com/josemiguelmelo/gocacheable/providers/bigcache"
@@ -91,21 +92,21 @@ func TestCacheableMethod(t *testing.T) {
 	var outValue int
 	err := cacheableManager.Cacheable(moduleName, "test", func() (interface{}, error) {
 		return methodToCache(), nil
-	}, &outValue)
+	}, &outValue, 100*time.Millisecond)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 9, outValue)
 
 	err = cacheableManager.Cacheable(moduleName, "test", func() (interface{}, error) {
 		return secondMethodToCache(), nil
-	}, &outValue)
+	}, &outValue, 100*time.Millisecond)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 9, outValue)
 
 	err = cacheableManager.Cacheable("moduleName", "test", func() (interface{}, error) {
 		return secondMethodToCache(), nil
-	}, &outValue)
+	}, &outValue, 100*time.Millisecond)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "Module not found", err.Error())
@@ -120,7 +121,7 @@ func TestCacheableMethodWithObject(t *testing.T) {
 	var outValue ExampleObj
 	err := cacheableManager.Cacheable(moduleName, "test_object", func() (interface{}, error) {
 		return ExampleObj{St: "yes", notShown: "here"}, nil
-	}, &outValue)
+	}, &outValue, 100*time.Millisecond)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "yes", outValue.St)
@@ -129,7 +130,7 @@ func TestCacheableMethodWithObject(t *testing.T) {
 
 	err = cacheableManager.Cacheable(moduleName, "test_object", func() (interface{}, error) {
 		return ExampleObj{St: "no", notShown: "here"}, nil
-	}, &outValue)
+	}, &outValue, 100*time.Millisecond)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "yes", outValue.St)
@@ -160,4 +161,35 @@ func TestCacheableReset(t *testing.T) {
 	err = cacheableManager.Get(moduleName, "test", &outVal)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Entry not found", err.Error())
+}
+
+func TestCacheableTimeToLive(t *testing.T) {
+	var outValue ExampleObj
+	err := cacheableManager.Cacheable(moduleName, "time_to_live", func() (interface{}, error) {
+		return ExampleObj{St: "yes", notShown: "here"}, nil
+	}, &outValue, 100*time.Millisecond)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "yes", outValue.St)
+	// Is not serializable as it is private, so is not cached.
+	assert.Equal(t, "", outValue.notShown)
+
+	err = cacheableManager.Cacheable(moduleName, "time_to_live", func() (interface{}, error) {
+		return ExampleObj{St: "no", notShown: "here"}, nil
+	}, &outValue, 100*time.Millisecond)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "yes", outValue.St)
+	// Is not serializable as it is private, so is not cached.
+	assert.Equal(t, "", outValue.notShown)
+
+	time.Sleep(200 * time.Millisecond)
+
+	err = cacheableManager.Cacheable(moduleName, "time_to_live", func() (interface{}, error) {
+		return ExampleObj{St: "no", notShown: "here"}, nil
+	}, &outValue, 100*time.Millisecond)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "no", outValue.St)
+	assert.Equal(t, "", outValue.notShown)
 }
