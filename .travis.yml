@@ -41,3 +41,19 @@ script:
   - make test  # Run all the tests with the race detector enabled
   - gover
   - goveralls -coverprofile gover.coverprofile -service travis-ci
+
+before_deploy:
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - bash <(curl -Ls https://raw.githubusercontent.com/josemiguelmelo/next-git-version/master/generate.sh) v > VERSION
+  - export TRAVIS_TAG=$(cat VERSION)
+  - git tag $TRAVIS_TAG $TRAVIS_COMMIT
+  
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  tag_name: $TRAVIS_TAG
+  target_commitish: $TRAVIS_COMMIT
+  name: $TRAVIS_TAG
+  overwrite: true
+  skip_cleanup: true
